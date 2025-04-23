@@ -45,6 +45,7 @@ db.sqlite3
 dynamodb-local-metadata.json
 scripts/backups/
 *.pyc
+dynamodb_local/dynamodb_local_latest.tar.gz
 
 # Python
 __pycache__/

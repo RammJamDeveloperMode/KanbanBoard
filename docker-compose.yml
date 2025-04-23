@@ -1,4 +1,5 @@
-version: '3.8'
+x-bake:
+  enabled: true
 
 services:
   nginx:
@@ -44,7 +45,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     environment:
-      - REACT_APP_GRAPHQL_URL=http://localhost/graphql
+      - REACT_APP_GRAPHQL_URL=http://backend:8000/graphql
     ports:
       - "3000:3000"
     volumes:
@@ -72,6 +73,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - kanban-network
 
 volumes:
   dynamodb_data:
