@@ -1,5 +1,170 @@
 # Kanban Board Assessment
 
+### Description
+This project implements a Trello/Kanban-like interface with drag & drop functionality for cards between columns. It includes basic operations for creating, deleting, and updating cards.
+
+### Project Requirements
+
+#### Technology Stack
+- **Frontend**: 
+  - React with Hooks
+  - Tailwind CSS
+  - Apollo Client GraphQL (no Redux)
+- **Backend**: 
+  - Python
+  - Graphene (GraphQL)
+- **Database**: 
+  - DynamoDB Local (for development)
+  - AWS DynamoDB (for production)
+
+### Implemented Features
+- Kanban interface implemented from scratch
+- Drag & drop functionality using `@hello-pangea/dnd`
+- CRUD operations for cards:
+  - Create new cards
+  - Delete cards with confirmation
+  - Update cards (title and description)
+- Column management:
+  - Create new columns
+  - Delete columns with confirmation
+  - Reorder columns through drag & drop
+- Name editing:
+  - Edit board name
+  - Edit column names
+- Automatic initialization:
+  - Automatic creation of a default board when starting the application
+  - Predefined columns: "To Do", "In Progress", "Completed"
+
+## Project Structure
+```
+.
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Board.jsx
+│   │   │   ├── Column.jsx
+│   │   │   ├── Card.jsx
+│   │   │   └── AddCardForm.jsx
+│   │   └── graphql/
+│   │       └── queries.js
+│   └── package.json
+├── backend/
+│   ├── kanban_backend/
+│   │   ├── schema.py
+│   │   └── settings.py
+│   └── requirements.txt
+├── Dockerfile.frontend
+├── Dockerfile.backend
+├── docker-compose.yml
+├── nginx.conf
+└── .env
+```
+
+## Environment Setup
+
+### Prerequisites
+- Docker
+- Docker Compose
+- Node.js (for local development)
+- Python 3.9+ (for local development)
+
+# Django Settings
+DJANGO_SECRET_KEY=your_secret_key
+DEBUG=True
+
+# Frontend Settings
+REACT_APP_API_URL=http://localhost:8000/graphql
+```
+
+## Running with Docker
+
+1. Build the images:
+```bash
+docker-compose build
+```
+
+2. Start the containers:
+```bash
+docker-compose up
+```
+
+3. Access the application:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+- DynamoDB Local: http://localhost:8001
+
+## Local Development
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+
+### Backend
+```bash
+cd backend
+python -m venv KB
+source KB/bin/activate
+pip install -r requirements.txt
+python manage.py runserver
+```
+
+## Technical Features
+
+### Frontend
+- Implemented with React and Hooks
+- Styled with Tailwind CSS
+- Backend communication through Apollo Client
+- Drag & drop implemented with `@hello-pangea/dnd`
+- State management with React Context and Apollo Cache
+
+### Backend
+- GraphQL API with Graphene
+- DynamoDB integration (no SQLite)
+- Error handling and validations
+- Detailed logging
+
+### Docker
+- Separate containers for frontend, backend, and DynamoDB
+- Nginx as reverse proxy
+- Volumes for DynamoDB data persistence
+- Implemented healthchecks
+
+### Data Persistence
+- **Local Configuration**:
+  - Data stored in DynamoDB Local
+  - Persistence through Docker volume (`dynamodb-data`)
+  - Automatic backup system in `backups/` directory
+  - Data management scripts:
+    ```bash
+    # View current database content
+    python scripts/check_dynamodb.py
+
+    # Create data backup
+    python scripts/backup_dynamodb.py
+
+    # Restore from backup (interactive)
+    python scripts/restore_dynamodb.py
+    ```
+  - Data persists even after Docker container restarts
+  - The restoration script includes:
+    - List of available backups
+    - Confirmation before restoration
+    - Detailed restoration summary
+    - Safe error handling
+
+## Implementation Notes
+- The Kanban interface was implemented from scratch
+- `@hello-pangea/dnd` was used only for drag & drop functionality
+- No pre-made Kanban board packages were used
+- The technology stack reflects the production stack
+- Exclusively DynamoDB database (no SQLite)
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
 ## Descripción
 Este proyecto implementa una interfaz tipo Trello/Kanban con funcionalidad de arrastrar y soltar (drag & drop) para tarjetas entre columnas. Incluye operaciones básicas de crear, eliminar y actualizar tarjetas.
 
