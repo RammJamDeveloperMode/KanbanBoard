@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copiar package.json y package-lock.json
+COPY frontend/package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el código de la aplicación
+COPY frontend/ .
+
+# Variables de entorno
+ENV REACT_APP_API_URL=http://backend:8000/graphql
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Comando para ejecutar la aplicación
+CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "3000"] 

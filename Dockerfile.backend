@@ -1,0 +1,29 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements primero para aprovechar la caché de Docker
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar el código de la aplicación
+COPY kanban_backend/ .
+
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=kanban_backend.settings
+ENV AWS_ACCESS_KEY_ID=local
+ENV AWS_SECRET_ACCESS_KEY=local
+ENV AWS_DEFAULT_REGION=us-west-2
+
+# Exponer el puerto
+EXPOSE 8000
+
+# Comando para ejecutar la aplicación
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"] 

@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - kanban-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      - DJANGO_SETTINGS_MODULE=kanban_backend.settings
+      - CORS_ORIGIN_WHITELIST=http://localhost,http://localhost:80,http://localhost:3000
+      - ALLOWED_HOSTS=localhost,backend,127.0.0.1
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
+      - AWS_DEFAULT_REGION=us-west-2
+      - DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./kanban_backend:/app/kanban_backend
+    depends_on:
+      - dynamodb-local
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://backend:8000/graphql"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kanban-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    environment:
+      - REACT_APP_GRAPHQL_URL=http://localhost/graphql
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kanban-network
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb-local
+    ports:
+      - "8002:8000"
+    volumes:
+      - dynamodb_data:/home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/shell/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dynamodb_data:
+    driver: local
+
+networks:
+  kanban-network:
+    driver: bridge 
