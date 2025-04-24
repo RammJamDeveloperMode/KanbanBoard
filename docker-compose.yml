@@ -20,8 +20,8 @@ services:
       dockerfile: Dockerfile.backend
     environment:
       - DJANGO_SETTINGS_MODULE=kanban_backend.settings
-      - CORS_ORIGIN_WHITELIST=http://localhost,http://localhost:80,http://localhost:3000
-      - ALLOWED_HOSTS=localhost,backend,127.0.0.1
+      - CORS_ORIGIN_WHITELIST=http://localhost,http://localhost:80,http://localhost:3000,http://frontend:3000
+      - ALLOWED_HOSTS=localhost,backend,127.0.0.1,frontend
       - AWS_ACCESS_KEY_ID=local
       - AWS_SECRET_ACCESS_KEY=local
       - AWS_DEFAULT_REGION=us-west-2
@@ -33,25 +33,31 @@ services:
     depends_on:
       - dynamodb-local
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://backend:8000/graphql"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
     networks:
       - kanban-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
     environment:
-      - REACT_APP_GRAPHQL_URL=http://backend:8000/graphql
+      - REACT_APP_GRAPHQL_URL=http://localhost:8001/graphql
+      - REACT_APP_API_URL=http://localhost:8001/graphql
+      - WDS_SOCKET_PORT=0
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app/frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
       interval: 30s
@@ -59,6 +65,8 @@ services:
       retries: 3
     networks:
       - kanban-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   dynamodb-local:
     image: amazon/dynamodb-local:latest
@@ -82,4 +90,8 @@ volumes:
 
 networks:
   kanban-network:
-    driver: bridge 
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16 

@@ -24,6 +24,7 @@ from django.http import JsonResponse
 import logging
 import json
 from .schema import schema
+from .health.views import HealthCheckView
 
 logger = logging.getLogger(__name__)
 
@@ -85,4 +86,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('graphql', csrf_exempt(LoggingGraphQLView.as_view(graphiql=True, schema=schema))),
     path('graphql/', csrf_exempt(LoggingGraphQLView.as_view(graphiql=True, schema=schema))),
+    path('health/', HealthCheckView.as_view(), name='health_check'),
 ]
